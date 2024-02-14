@@ -2,6 +2,20 @@
 require 'oj'
 require 'json'
 
+# This is a custom handler for Oj that will stream a JSON object to a processor
+# as it is parsed. This is useful for large JSON objects that you don't want to
+# load into memory all at once.
+#
+# Usage:
+#   jsonio = File.open('customers-hash.json', 'r')
+#   processor = proc { |result| p result }
+#   Oj.sc_parse(HashHandler.new(processor), jsonio)
+#
+# The processor will be called with each hash object in the JSON file.
+#
+# Note: This is a very basic example and does not handle all JSON types.
+# For a more complete example, see the Oj::ScHandler documentation.
+# https://www.rubydoc.info/gems/oj/Oj/ScHandler
 class HashHandler < ::Oj::ScHandler
   def initialize(processor)
     @processor = processor
@@ -38,8 +52,10 @@ class HashHandler < ::Oj::ScHandler
   end
 end
 
-jsonio = File.open('customers-hash.json', 'r')
-processor = proc { |result| p result }
-Oj.sc_parse(HashHandler.new(processor), jsonio)
+if __FILE__ == $0
+  jsonio = File.open('customers-hash.json', 'r')
+  processor = proc { |result| p result }
+  Oj.sc_parse(HashHandler.new(processor), jsonio)
+end
 
 
